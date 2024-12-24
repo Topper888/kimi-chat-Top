@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kimi Chat</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Navigation styles */
+        .navbar {
+            padding: 1rem 2rem;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+        }
+
+        /* Main content container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="/" class="logo">AI Teaching Assistant</a>
+                <!-- <a href="/text-chat" class="nav-link">Text</a>
+                <a href="/image-chat" class="nav-link">Image</a>
+                <a href="/ppt-gen" class="nav-link">PPT</a> -->
+                <a href="/new/text-chat" class="nav-link">Text</a>
+                <a href="/new/image-chat" class="nav-link">Image</a>
+                <a href="/new/ppt-gen" class="nav-link">PPT</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <%- body %>
+    </div>
+</body>
+</html> 

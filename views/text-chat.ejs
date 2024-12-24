@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Teaching Assistant - Chat</title>
+    <style>
+        .chat-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            height: calc(100vh - 150px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0 1rem;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .chat-input-wrapper {
+            background-color: #ffffff;
+            border-radius: 25px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            outline: none;
+            background: transparent;
+        }
+
+        .send-button {
+            background-color: transparent;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Message styles */
+        .message {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 10px;
+            max-width: 70%;
+        }
+
+        .user-message {
+            background-color: #007AFF;
+            color: white;
+            margin-left: auto;
+        }
+
+        .bot-message {
+            background-color: #F0F0F0;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="chat-input-wrapper">
+            <input type="text" 
+                   class="chat-input" 
+                   placeholder="Send a message..." 
+                   id="messageInput">
+            <button class="send-button" id="sendButton">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatMessages = document.getElementById('chatMessages');
+
+        // Clear any existing messages when connecting
+        chatMessages.innerHTML = '';
+
+        socket.on('connect', () => {
+            console.log('Connected to server'); // Debug log
+        });
+
+        function addMessage(message, isUser = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function handleSendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                messageInput.value = '';
+                
+                // Send message to server
+                socket.emit('chat message', message);
+                
+                // Disable input while waiting for response
+                messageInput.disabled = true;
+                sendButton.disabled = true;
+            }
+        }
+
+        // Listen for responses from the server
+        socket.on('chat response', (data) => {
+            console.log('Received message:', data.message); // Debug log
+            addMessage(data.message, false);
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+            messageInput.focus();
+        });
+
+        socket.on('error', (data) => {
+            addMessage(`Error: ${data.message}`, false);
+            // Re-enable input after error
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+        });
+
+        sendButton.addEventListener('click', handleSendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Teaching Assistant - Image Generation</title>
+    <link rel="stylesheet" href="/css/new/main.css">
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-messages" id="messages">
+            <!-- 消息内容 -->
+        </div>
+        <div class="chat-input">
+            <div class="input-box">
+                <textarea id="message-input" placeholder="请描述您想要生成的图片..." rows="1"></textarea>
+                <button class="btn btn-primary" id="send-button">生成</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- <script src="/js/new/image-chat.js"></script> -->
+    <script>
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const chatMessages = document.getElementById('messages');
+        let messageHistory = [];
+
+        // Clear any existing messages when connecting
+        chatMessages.innerHTML = '';
+
+        function addMessage(sender, content, isImage = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            if (isImage) {
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'image-container';
+
+                const img = document.createElement('img');
+                img.src = content;
+                img.className = 'image-message';
+
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'download-btn';
+                downloadBtn.innerHTML = `
+                    <svg class="download-icon" viewBox="0 0 24 24">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Download
+                `;
+
+                downloadBtn.onclick = async () => {
+                    try {
+                        // Use our proxy endpoint instead of fetching directly
+                        const response = await fetch('/image-chat/api/download-image', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ imageUrl: content })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to download image');
+                        }
+
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `generated-image-${Date.now()}.png`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    } catch (error) {
+                        console.error('Error downloading image:', error);
+                        alert('Failed to download image');
+                    }
+                };
+
+                imageContainer.appendChild(img);
+                imageContainer.appendChild(downloadBtn);
+                messageDiv.appendChild(imageContainer);
+            } else {
+                messageDiv.textContent = content;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Store in history
+            messageHistory.push({ sender, content, isImage });
+        }
+
+        async function handleSendMessage() {
+            const prompt = messageInput.value.trim();
+            if (!prompt) return;
+
+            // Add user message
+            addMessage('user', prompt);
+            messageInput.value = '';
+
+            // Show loading state
+            addMessage('bot', 'Generating image...');
+
+            try {
+                const response = await fetch('/image-chat/api/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+
+                // Remove loading message
+                chatMessages.removeChild(chatMessages.lastChild);
+
+                if (data.error) {
+                    // Display the error message in the chat
+                    addMessage('bot', data.error);
+                } else {
+                    // Display the generated image
+                    addMessage('bot', data.imageUrl, true);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('bot', 'Sorry, there was an error generating the image.');
+            }
+        }
+
+        sendButton.addEventListener('click', handleSendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
+    </script>
+</body>
+
+</html>

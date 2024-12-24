@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Teaching Assistant</title>
+    <style>
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .tab {
+            background-color: #4a90e2;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 8px;
+            width: 250px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+
+        .tab:hover {
+            transform: translateY(-5px);
+        }
+
+        .tab-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .tab-description {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Welcome to AI Teaching Assistant</h1>
+    <div class="tabs-container">
+        <a href="/new/text-chat" class="tab">
+        <!-- <a href="/text-chat" class="tab"> -->
+            <div class="tab-title">Text</div>
+            <div class="tab-description">Generate text teaching materials</div>
+        </a>
+        <a href="/new/image-chat" class="tab">
+        <!-- <a href="/image-chat" class="tab"> -->
+            <div class="tab-title">Image</div>
+            <div class="tab-description">Generate visual teaching materials</div>
+        </a>
+        <a href="/new/ppt-gen" class="tab">
+        <!-- <a href="/ppt-gen" class="tab"> -->
+            <div class="tab-title">PPT</div>
+            <div class="tab-description">Generate lesson plans and materials in ppt format</div>
+        </a>
+    </div>
+</body>
+</html>

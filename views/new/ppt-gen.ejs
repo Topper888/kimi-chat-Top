@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Teaching Assistant - PPT Generation</title>
+    <link rel="stylesheet" href="/css/new/main.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-messages" id="messages">
+            <!-- 消息内容 -->
+        </div>
+        <div class="chat-input">
+            <div class="input-box">
+                <textarea id="message-input" placeholder="请输入PPT主题和要求..." rows="1"></textarea>
+                <button class="btn btn-primary" onclick="generatePPT()">生成</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/new/ppt-gen.js"></script>
+</body>
+</html> 

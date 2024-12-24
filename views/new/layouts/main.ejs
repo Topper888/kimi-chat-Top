@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/new/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="expanded">
+    <!-- 折叠时的菜单按钮 -->
+    <div class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- 用户登录按钮/头像 -->
+    <div class="user-profile">
+        <div class="login-btn" id="loginBtn" onclick="showLoginModal()">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>登录</span>
+        </div>
+        <div class="user-avatar hidden" id="userAvatar" onclick="toggleUserMenu()">
+            <img src="" alt="用户头像">
+            <div class="user-menu">
+                <div class="menu-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    退出登录
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="kimi-profile">
+                <a href="/" class="logo">AI Teaching Assistant</a>
+            </div>
+            <button class="collapse-btn" onclick="toggleSidebar()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 24 24">
+                    <path fill="currentColor" fill-rule="evenodd" d="M10.247 6.844v10.334h7.871c.325 0 .546-.085.695-.229.144-.14.234-.363.234-.708V7.78c0-.345-.09-.568-.234-.708-.149-.144-.37-.23-.695-.23zm-1.423 0H5.889c-.33 0-.553.085-.7.228-.14.14-.228.363-.228.71v8.459c0 .346.087.57.227.71.148.142.371.227.701.227h2.935zM5.702 12.93a.556.556 0 0 1 .005-.814.58.58 0 0 1 .399-.16h1.573c.156 0 .297.053.408.163a.556.556 0 0 1 .003.812.57.57 0 0 1-.411.165H6.106a.57.57 0 0 1-.399-.16zM4.1 5.994c.417-.408 1.021-.594 1.774-.594h12.259c.753 0 1.356.186 1.768.595s.599 1 .599 1.734v8.564c0 .735-.188 1.326-.599 1.734-.412.41-1.015.595-1.768.595H5.874c-.753 0-1.357-.186-1.774-.594-.413-.404-.6-.996-.6-1.735V7.729c0-.739.187-1.33.6-1.735m3.579 3.45H6.106a.56.56 0 0 1-.404-.173.56.56 0 0 1-.174-.4.54.54 0 0 1 .177-.404.56.56 0 0 1 .4-.17H7.68c.16 0 .3.058.41.172a.54.54 0 0 1 .175.401c0 .155-.064.29-.172.398a.56.56 0 0 1-.413.176m0 1.83H6.106a.56.56 0 0 1-.404-.173.56.56 0 0 1-.174-.409c0-.156.065-.29.177-.396a.56.56 0 0 1 .4-.17H7.68c.16 0 .3.059.41.173.111.105.175.239.175.393a.56.56 0 0 1-.172.406.56.56 0 0 1-.413.175" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="/new/text-chat" class="<%= path === '/new/text-chat' ? 'active' : '' %>">
+                <span>文本对话</span>
+            </a></li>
+            <li><a href="/new/image-chat" class="<%= path === '/new/image-chat' ? 'active' : '' %>">
+                <span>图片生成</span>
+            </a></li>
+            <li><a href="/new/ppt-gen" class="<%= path === '/new/ppt-gen' ? 'active' : '' %>">
+                <span>PPT生成</span>
+            </a></li>
+        </ul>
+        <div class="chat-history">
+            <div class="history-header" onclick="toggleHistory()">
+                <span>历史对话</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="history-list" id="historyList">
+            </div>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <%- body %>
+    </main>
+
+    <script src="/js/new/layout.js"></script>
+    <%- script %>
+</body>
+</html> 
