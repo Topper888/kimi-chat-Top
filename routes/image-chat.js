@@ -37,23 +37,37 @@ router.post('/api/generate-image', async (req, res) => {
         if (!prompt) {
             return res.status(400).json({ error: 'Prompt is required' });
         }
-
-        if (!imageGenerator) {
-            throw new Error('Image generator not initialized');
+        // Try the external image generation API first
+        try {
+            console.log('prompt:', prompt);
+            const apiResponse = await axios.get(`http://43.156.109.32:8080/ai/image/generate?message=${prompt}&sessionId=${123}`);
+            
+            console.log('apiResponse:', apiResponse.data);
+            if (apiResponse.data.code === 200 && apiResponse.data.data) {
+                return res.json({ imageUrl: apiResponse.data.data });
+            } else {
+                res.status(200).json({ error: 'Failed to generate image' });
+            }
+        } catch (error) {
+            console.log('External API failed, falling back to local generator:', error);
+            // Continue to local generator if external API fails
         }
+        // if (!imageGenerator) {
+        //     throw new Error('Image generator not initialized');
+        // }
 
-        // Call Python function to generate image - pass prompt as a single argument
-        const response = await py.call(imageGenerator, "generate_image", prompt);
+        // // Call Python function to generate image - pass prompt as a single argument
+        // const response = await py.call(imageGenerator, "generate_image", prompt);
         
-        if (!response) {
-            throw new Error('Failed to generate image');
-        }
+        // if (!response) {
+        //     throw new Error('Failed to generate image');
+        // }
 
-        if (response.error) {
-            return res.status(400).json({ error: response.error });
-        }
+        // if (response.error) {
+        //     return res.status(400).json({ error: response.error });
+        // }
 
-        res.json({ imageUrl: response.url });
+        // res.json({ imageUrl: response.url });
 
     } catch (error) {
         console.error('Error generating image:', error);

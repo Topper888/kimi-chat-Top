@@ -14,11 +14,11 @@
         <div class="chat-input">
             <div class="input-box">
                 <textarea id="message-input" placeholder="输入消息..." rows="1"></textarea>
-                <button class="btn btn-primary" onclick="sendMessage()">发送</button>
+                <button class="btn btn-primary" id="send-message" >发送</button>
             </div>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/new/chat.js"></script>
 </body>

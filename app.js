@@ -5,7 +5,7 @@ const { create } = require('express-handlebars');
 const bodyParser = require('body-parser');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
-const kimiAPI = require('./utils/kimiAPI');
+const kimiAPI = require('./utils/new/kimiAPI');
 const imageChatRouter = require('./routes/image-chat');
 
 const app = express();
@@ -26,11 +26,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+
+// 在生产环境中使用打包后的视图
+const viewsPath = process.env.NODE_ENV === 'production' 
+  ? path.join(__dirname, 'dist/views')
+  : path.join(__dirname, 'views');
+
+app.set('views', viewsPath);
 
 // Routes
 app.use('/', require('./routes/index'));
-// app.use('/text-chat', require('./routes/text-chat'));
+app.use('/text-chat', require('./routes/text-chat'));
 app.use('/image-chat', imageChatRouter);
 app.use('/ppt-gen', require('./routes/ppt-gen'));
 
@@ -49,7 +55,7 @@ app.use('/new/image-chat', (req, res) => {
         title: 'AI Teaching Assistant - Image Generation',
         layout: 'new/layouts/main',
         path: '/new/image-chat',
-        script: '<script src="/js/new/image-gen.js"></script>'
+        script: '<script src="/socket.io/socket.io.js"></script><script src="/js/new/image-chat.js"></script>'
     });
 });
 

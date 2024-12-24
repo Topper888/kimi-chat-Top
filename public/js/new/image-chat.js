@@ -1,171 +1,133 @@
 const socket = io();
 
-let currentMessageDiv = null;
-let currentSessionId = null;
-
-// 生成会话ID
-function generateSessionId() {
-    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// 初始化新会话
-function initNewSession() {
-    currentSessionId = generateSessionId();
-    const userId = localStorage.getItem('userId');
-    return { sessionId: currentSessionId, userId };
-}
-
-// 发送消息生成图片
-function generateImage() {
-    const messageInput = document.getElementById('message-input');
-    if (!messageInput) {
-        console.error('Message input element not found');
-        return;
+const CONFIG = {
+    AVATAR_CONFIG: {
+        ai: 'https://api.dicebear.com/7.x/bottts/svg?seed=ai-assistant',
+        user: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user'
     }
+};
 
-    const message = messageInput.value.trim();
-    if (message) {
-        // 如果是新对话，初始化会话ID
-        if (!currentSessionId) {
-            initNewSession();
-        }
-        
-        appendMessage(message, true);
-        socket.emit('generate image', {
-            prompt: message,
-            sessionId: currentSessionId,
-            userId: localStorage.getItem('userId')
-        });
-        
-        saveToHistory(message);
-        messageInput.value = '';
-        messageInput.disabled = true;
-        currentMessageDiv = null;
-    }
-}
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const chatMessages = document.getElementById('messages');
+let messageHistory = [];
 
-// 添加消息到聊天界面
-function appendMessage(message, isUser = false) {
-    const messagesDiv = document.getElementById('messages');
-    if (!messagesDiv) {
-        console.error('Messages container not found');
-        return;
-    }
+// Clear any existing messages when connecting
+chatMessages.innerHTML = '';
+
+function addMessage(sender, content, isImage = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message message-${sender === 'user' ? 'user' : 'ai'}`;
     
-    if (isUser) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message message-user`;
-        
-        const avatarDiv = document.createElement('div');
-        avatarDiv.className = 'message-avatar';
-        avatarDiv.style.backgroundImage = `url('${CONFIG.AVATAR_CONFIG.user}')`;
-        messageDiv.appendChild(avatarDiv);
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-        contentDiv.textContent = message;
-        
-        messageDiv.appendChild(contentDiv);
-        messagesDiv.appendChild(messageDiv);
-    } else {
-        if (!currentMessageDiv) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message message-ai';
-            
-            const avatarDiv = document.createElement('div');
-            avatarDiv.className = 'message-avatar';
-            avatarDiv.style.backgroundImage = `url('${CONFIG.AVATAR_CONFIG.ai}')`;
-            messageDiv.appendChild(avatarDiv);
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            currentMessageDiv = contentDiv;
-            
-            if (message.type === 'image') {
-                const img = document.createElement('img');
-                img.src = message.url;
-                img.alt = '生成的图片';
-                contentDiv.appendChild(img);
-            } else {
-                contentDiv.textContent = message;
+    // 添加头像
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'message-avatar';
+    avatarDiv.style.backgroundImage = `url('${CONFIG.AVATAR_CONFIG[sender === 'user' ? 'user' : 'ai']}')`;
+    messageDiv.appendChild(avatarDiv);
+    
+    // 添加消息内容容器
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+
+    if (isImage) {
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'image-container';
+
+        const img = document.createElement('img');
+        img.src = content;
+        img.className = 'image-message';
+
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'download-btn';
+        downloadBtn.innerHTML = `
+            <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+            Download
+        `;
+
+        downloadBtn.onclick = async () => {
+            try {
+                const response = await fetch('/image-chat/api/download-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ imageUrl: content })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to download image');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `generated-image-${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('Error downloading image:', error);
+                alert('Failed to download image');
             }
-            
-            messageDiv.appendChild(contentDiv);
-            messagesDiv.appendChild(messageDiv);
-        }
-    }
-    
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-// Socket event listeners
-socket.on('image generated', (data) => {
-    if (data.url) {
-        appendMessage({ type: 'image', url: data.url }, false);
-    }
-    const messageInput = document.getElementById('message-input');
-    if (messageInput) {
-        messageInput.disabled = false;
-    }
-    currentMessageDiv = null;
-});
-
-socket.on('error', (data) => {
-    appendMessage(`Error: ${data.message}`, false);
-    const messageInput = document.getElementById('message-input');
-    if (messageInput) {
-        messageInput.disabled = false;
-    }
-    currentMessageDiv = null;
-});
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    const messageInput = document.getElementById('message-input');
-    if (messageInput) {
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                generateImage();
-            }
-        });
-    }
-});
-
-// 保存历史记录
-function saveToHistory(message) {
-    const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-    
-    // 检查是否存在当前会话的记录
-    const existingChatIndex = history.findIndex(item => item.id === currentSessionId);
-    
-    if (existingChatIndex !== -1) {
-        // 更新现有会话的消息
-        history[existingChatIndex].messages.push({
-            type: 'user',
-            content: message
-        });
-        history[existingChatIndex].timestamp = new Date().toISOString();
-    } else {
-        // 创建新会话记录
-        const newChat = {
-            id: currentSessionId,
-            title: message.slice(0, 20) + (message.length > 20 ? '...' : ''),
-            timestamp: new Date().toISOString(),
-            firstMessage: message,
-            messages: [{
-                type: 'user',
-                content: message
-            }]
         };
-        history.unshift(newChat);
-        
-        // 限制历史记录数量
-        if (history.length > CONFIG.maxHistoryItems) {
-            history.pop();
-        }
+
+        imageContainer.appendChild(img);
+        imageContainer.appendChild(downloadBtn);
+        contentDiv.appendChild(imageContainer);
+    } else {
+        contentDiv.textContent = content;
     }
-    
-    localStorage.setItem('chatHistory', JSON.stringify(history));
-    loadChatHistory();
-} 
+
+    messageDiv.appendChild(contentDiv);
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Store in history
+    messageHistory.push({ sender, content, isImage });
+}
+
+async function handleSendMessage() {
+    const prompt = messageInput.value.trim();
+    if (!prompt) return;
+
+    // Add user message
+    addMessage('user', prompt);
+    messageInput.value = '';
+
+    // Show loading state
+    addMessage('ai', '图片生成中...');
+
+    try {
+        const response = await fetch('/image-chat/api/generate-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+        
+        // Remove loading message
+        chatMessages.removeChild(chatMessages.lastChild);
+
+        if (data.error) {
+            addMessage('ai', data.error);
+        } else {
+            addMessage('ai', data.imageUrl, true);
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        addMessage('ai', 'Sorry, there was an error generating the image.');
+    }
+}
+
+sendButton.addEventListener('click', handleSendMessage);
+messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+    }
+});

@@ -11,6 +11,10 @@ const CONFIG = {
 
 let currentMessageDiv = null;
 let currentSessionId = null;  // 当前会话ID
+console.log('marked', marked);
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-message');
+// const chatMessages = document.getElementById('messages');
 
 // 生成会话ID
 function generateSessionId() {
@@ -113,42 +117,50 @@ function appendMessage(message, isUser = false) {
             messageDiv.appendChild(contentDiv);
             messagesDiv.appendChild(messageDiv);
         }
+
+       
         
         // 处理流式响应的新逻辑
         if (message) {
-            let newText = message;
             let currentText = currentMessageDiv.textContent || '';
-            
-            // 处理特殊情况
-            if (newText.startsWith('#') || newText.startsWith('##') || newText.startsWith('###')) {
-                // 标题需要换行
-                currentText += '\n' + newText;
-            } else if (newText.startsWith('-') || newText.startsWith('*') || /^\d+\./.test(newText)) {
-                // 列表项需要换行
-                currentText += '\n' + newText;
-            } else if (newText.trim().length === 0) {
-                // 空行
-                currentText += '\n';
-            } else if (currentText.endsWith('。') || currentText.endsWith('！') || currentText.endsWith('？') || 
-                       currentText.endsWith('.') || currentText.endsWith('!') || currentText.endsWith('?')) {
-                // 句子结束，添加换行
-                currentText += '\n' + newText;
-            } else {
-                // 普通文本，直接拼接
-                currentText += newText;
-            }
-            
-            currentMessageDiv.textContent = currentText;
-            // 格式化并显示消息
-            currentMessageDiv.innerHTML = formatMessage(currentText);
+            currentText += message;
+            currentMessageDiv.dataset.fullText = currentText;
+            // 使用 marked.js 格式化并显示消息
+            currentMessageDiv.innerHTML = marked.parse(currentMessageDiv.dataset.fullText);
         }
+        // if (message) {
+        //     let newText = message;
+        //     let currentText = currentMessageDiv.textContent || '';
+            
+        //     // 处理特殊情况
+        //     if (newText.startsWith('#') || newText.startsWith('##') || newText.startsWith('###')) {
+        //         // 标题需要换行
+        //         currentText += '\n' + newText;
+        //     } else if (newText.startsWith('-') || newText.startsWith('*') || /^\d+\./.test(newText)) {
+        //         // 列表项需要换行
+        //         currentText += '\n' + newText;
+        //     } else if (newText.trim().length === 0) {
+        //         // 空行
+        //         currentText += '\n';
+        //     } else if (currentText.endsWith('。') || currentText.endsWith('！') || currentText.endsWith('？') ||
+        //                currentText.endsWith('.') || currentText.endsWith('!') || currentText.endsWith('?')) {
+        //         // 句子结束，添加换行
+        //         currentText += '\n' + newText;
+        //     } else {
+        //         // 普通文本，直接拼接
+        //         currentText += newText;
+        //     }
+            
+        //     currentMessageDiv.textContent = currentText;
+        //     // 格式化并显示消息
+        //     currentMessageDiv.innerHTML = formatMessage(currentText);
+        // }
     }
     
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 function sendMessage() {
-    const messageInput = document.getElementById('message-input');
     const message = messageInput.value.trim();
     
     if (message) {
@@ -205,9 +217,16 @@ socket.on('error', (data) => {
     currentMessageDiv = null;
 });
 
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    const messageInput = document.getElementById('message-input');
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -339,3 +358,8 @@ function loadChat(chatId) {
         });
     }
 }
+
+// 将需要在HTML中调用的函数暴露给全局作用域
+window.loadChat = loadChat;
+window.editChatTitle = editChatTitle;
+window.deleteChat = deleteChat;

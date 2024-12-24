@@ -245,6 +245,40 @@ body.collapsed .main-content {
     color: inherit;
 }
 
+.image-container {
+    position: relative;
+}
+
+.message-content img {
+    width: 480px;
+    height: 480px;
+    object-fit: contain;
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+.download-btn {
+    position: absolute;
+    top: 0px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.download-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
 /* 聊天输入框样式 */
 .chat-input {
     position: fixed;
@@ -561,13 +595,13 @@ body.collapsed .chat-input {
 
 /* AI头像特殊样式 */
 .message-ai .message-avatar {
-    background-image: url('/images/ai-avatar.png');
+    /* background-image: url('/images/ai-avatar.png'); */
     background-color: #f0f2f5;
 }
 
 /* 用户头像特殊样式 */
 .message-user .message-avatar {
-    background-image: url('/images/user-avatar.png');
+    /* background-image: url('/images/user-avatar.png'); */
     background-color: #e3e6eb;
 }
 
