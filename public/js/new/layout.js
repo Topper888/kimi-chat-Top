@@ -38,3 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         userAvatar.querySelector('img').src = user.avatar;
     }
 }); 
+
+// 将 toggleSidebar 函数暴露给全局作用域
+window.toggleSidebar = toggleSidebar;

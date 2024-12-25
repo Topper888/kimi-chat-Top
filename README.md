@@ -37,3 +37,8 @@ npm run dev
 ## 注意事项
 - 确保所有环境变量都已正确配置
 - 如遇到依赖安装问题，可以尝试删除 node_modules 文件夹和 package-lock.json，然后重新运行 `npm install` 
+
+
+
+
+

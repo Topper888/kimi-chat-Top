@@ -11,7 +11,7 @@ const CONFIG = {
 
 let currentMessageDiv = null;
 let currentSessionId = null;  // 当前会话ID
-console.log('marked', marked);
+
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-message');
 // const chatMessages = document.getElementById('messages');
@@ -81,7 +81,7 @@ function formatMessage(text) {
     }).join('\n');
 }
 
-function appendMessage(message, isUser = false) {
+function appendMessage(message, isUser = false, isLoading = false) {
     const messagesDiv = document.getElementById('messages');
     
     if (isUser) {
@@ -113,48 +113,40 @@ function appendMessage(message, isUser = false) {
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
             currentMessageDiv = contentDiv;
-            
+            if (isLoading) {
+                currentMessageDiv.innerHTML = '<div class="spinner"></div>';
+            }
             messageDiv.appendChild(contentDiv);
             messagesDiv.appendChild(messageDiv);
         }
 
-       
-        
-        // 处理流式响应的新逻辑
-        if (message) {
+         if (message) {
+            let newText = message;
             let currentText = currentMessageDiv.textContent || '';
-            currentText += message;
-            currentMessageDiv.dataset.fullText = currentText;
-            // 使用 marked.js 格式化并显示消息
-            currentMessageDiv.innerHTML = marked.parse(currentMessageDiv.dataset.fullText);
+            
+            // 处理特殊情况
+            if (newText.startsWith('#') || newText.startsWith('##') || newText.startsWith('###')) {
+                // 标题需要换行
+                currentText += '\n' + newText;
+            } else if (newText.startsWith('-') || newText.startsWith('*') || /^\d+\./.test(newText)) {
+                // 列表项需要换行
+                currentText += '\n' + newText;
+            } else if (newText.trim().length === 0) {
+                // 空行
+                currentText += '\n';
+            } else if (currentText.endsWith('。') || currentText.endsWith('！') || currentText.endsWith('？') ||
+                       currentText.endsWith('.') || currentText.endsWith('!') || currentText.endsWith('?')) {
+                // 句子结束，添加换行
+                currentText += '\n' + newText;
+            } else {
+                // 普通文本，直接拼接
+                currentText += newText;
+            }
+            
+            currentMessageDiv.textContent = currentText;
+            // 格式化并显示消息
+            currentMessageDiv.innerHTML = formatMessage(currentText);
         }
-        // if (message) {
-        //     let newText = message;
-        //     let currentText = currentMessageDiv.textContent || '';
-            
-        //     // 处理特殊情况
-        //     if (newText.startsWith('#') || newText.startsWith('##') || newText.startsWith('###')) {
-        //         // 标题需要换行
-        //         currentText += '\n' + newText;
-        //     } else if (newText.startsWith('-') || newText.startsWith('*') || /^\d+\./.test(newText)) {
-        //         // 列表项需要换行
-        //         currentText += '\n' + newText;
-        //     } else if (newText.trim().length === 0) {
-        //         // 空行
-        //         currentText += '\n';
-        //     } else if (currentText.endsWith('。') || currentText.endsWith('！') || currentText.endsWith('？') ||
-        //                currentText.endsWith('.') || currentText.endsWith('!') || currentText.endsWith('?')) {
-        //         // 句子结束，添加换行
-        //         currentText += '\n' + newText;
-        //     } else {
-        //         // 普通文本，直接拼接
-        //         currentText += newText;
-        //     }
-            
-        //     currentMessageDiv.textContent = currentText;
-        //     // 格式化并显示消息
-        //     currentMessageDiv.innerHTML = formatMessage(currentText);
-        // }
     }
     
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -175,34 +167,20 @@ function sendMessage() {
             sessionId: currentSessionId,
             userId: localStorage.getItem('userId')
         });
+
         
-        saveToHistory(message);
+        // saveToHistory(message);
         messageInput.value = '';
         messageInput.disabled = true;
         currentMessageDiv = null;
     }
 }
 
-async function fetchStreamData(message) {
-    const userId = localStorage.getItem('userId');
-    const response = await fetch(`http://43.156.109.32:8080/ai/generateStream?sessionId=${userId}&message=${message}`);
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        appendMessage(chunk, false);
-    }
-
-    document.getElementById('message-input').disabled = false;
-    currentMessageDiv = null;
-}
 
 // Socket event listeners
 socket.on('chat response', (data) => {
     if (data.message) {
+        // 隐藏loading动画
         appendMessage(data.message, false);
     }
     if (data.done) {
