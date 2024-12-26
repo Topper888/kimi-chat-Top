@@ -23,6 +23,7 @@
     "express": "^4.21.1",
     "express-ejs-layouts": "^2.5.0",
     "express-handlebars": "^8.0.1",
+    "markdown-it": "^14.1.0",
     "node-calls-python": "^1.11.1",
     "openai": "^4.73.1",
     "pm2": "^5.3.0",
@@ -43,10 +44,10 @@
     "postcss": "^8.4.31",
     "postcss-loader": "^7.3.3",
     "postcss-preset-env": "^9.1.4",
+    "rimraf": "^5.0.1",
     "style-loader": "^3.3.3",
     "terser-webpack-plugin": "^5.3.9",
     "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4",
-    "rimraf": "^5.0.1"
+    "webpack-cli": "^5.1.4"
   }
 }

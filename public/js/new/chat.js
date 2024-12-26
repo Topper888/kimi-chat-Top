@@ -1,4 +1,18 @@
+
 const socket = io();
+
+// // 在 script 中使用 custom 字段
+// const custom = <%- JSON.stringify(custom) %>;
+// const custom = window.custom;
+// console.log('custom:', custom);
+
+// 创建 MarkdownIt 实例
+const md = window.markdownit({
+    highlight: true,
+    linkify: true,
+    typographer: true
+});
+
 
 // 在文件顶部添加配置
 const CONFIG = {
@@ -11,6 +25,7 @@ const CONFIG = {
 
 let currentMessageDiv = null;
 let currentSessionId = null;  // 当前会话ID
+
 
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-message');
@@ -31,8 +46,10 @@ function initNewSession() {
 
 // 添加 socket.id 存储逻辑
 socket.on('session_init', (data) => {
+    const { sessionId, userId } = data;
     localStorage.setItem('userId', data.userId);
-    console.log('Received userId:', data.userId);
+    localStorage.setItem('sessionId', data.sessionId);
+    console.log('Received userId:', data);
 });
 
 function formatMessage(text) {
@@ -113,39 +130,26 @@ function appendMessage(message, isUser = false, isLoading = false) {
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
             currentMessageDiv = contentDiv;
-            if (isLoading) {
-                currentMessageDiv.innerHTML = '<div class="spinner"></div>';
-            }
+            // if (isLoading) {
+            //     currentMessageDiv.innerHTML = '<div class="spinner"></div>';
+            // }
             messageDiv.appendChild(contentDiv);
             messagesDiv.appendChild(messageDiv);
         }
 
          if (message) {
-            let newText = message;
-            let currentText = currentMessageDiv.textContent || '';
+            let currentText = currentMessageDiv.dataset.fullText || '';
+            currentText += message;
+            currentMessageDiv.dataset.fullText = currentText;
             
-            // 处理特殊情况
-            if (newText.startsWith('#') || newText.startsWith('##') || newText.startsWith('###')) {
-                // 标题需要换行
-                currentText += '\n' + newText;
-            } else if (newText.startsWith('-') || newText.startsWith('*') || /^\d+\./.test(newText)) {
-                // 列表项需要换行
-                currentText += '\n' + newText;
-            } else if (newText.trim().length === 0) {
-                // 空行
-                currentText += '\n';
-            } else if (currentText.endsWith('。') || currentText.endsWith('！') || currentText.endsWith('？') ||
-                       currentText.endsWith('.') || currentText.endsWith('!') || currentText.endsWith('?')) {
-                // 句子结束，添加换行
-                currentText += '\n' + newText;
+            // currentMessageDiv.textContent = currentText;
+
+            if (md) {
+                currentMessageDiv.innerHTML = md.render(currentText);
             } else {
-                // 普通文本，直接拼接
-                currentText += newText;
+                currentMessageDiv.innerHTML = formatMessage(currentText);
             }
-            
-            currentMessageDiv.textContent = currentText;
-            // 格式化并显示消息
-            currentMessageDiv.innerHTML = formatMessage(currentText);
+
         }
     }
     
@@ -156,10 +160,6 @@ function sendMessage() {
     const message = messageInput.value.trim();
     
     if (message) {
-        // 如果是新对话，初始化会话ID
-        if (!currentSessionId) {
-            initNewSession();
-        }
         
         appendMessage(message, true);
         socket.emit('chat message', {

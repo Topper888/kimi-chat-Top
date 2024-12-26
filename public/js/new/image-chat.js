@@ -90,6 +90,29 @@ function addMessage(sender, content, isImage = false) {
     messageHistory.push({ sender, content, isImage });
 }
 
+(async () => {
+    try {
+        const prompt = ""
+        const response = await fetch('/image-chat/api/generate-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+        
+
+        if (data.message) {
+            addMessage('ai', data.message, false);
+        } else {
+            addMessage('ai', data.imageUrl, true);
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        addMessage('ai', 'Sorry, there was an error generating the image.');
+    }
+})()
+
 async function handleSendMessage() {
     const prompt = messageInput.value.trim();
     if (!prompt) return;
@@ -112,10 +135,10 @@ async function handleSendMessage() {
         // Remove loading message
         chatMessages.removeChild(chatMessages.lastChild);
 
-        if (data.error) {
-            addMessage('ai', data.error);
-        } else {
+        if (data.imageUrl) {
             addMessage('ai', data.imageUrl, true);
+        } else {
+            addMessage('ai', 'Sorry, there was an error generating the image.', false);
         }
 
     } catch (error) {
@@ -123,6 +146,8 @@ async function handleSendMessage() {
         addMessage('ai', 'Sorry, there was an error generating the image.');
     }
 }
+
+
 
 sendButton.addEventListener('click', handleSendMessage);
 messageInput.addEventListener('keypress', (e) => {

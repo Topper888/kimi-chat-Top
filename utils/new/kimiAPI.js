@@ -25,69 +25,61 @@ class KimiAPI {
        
     }
 
+    async *chatCompletionStream(message) {
+        try {
+            const response = await fetch(`http://43.156.109.32:8080/ai/generateStream?sessionId=${message.sessionId}&message=${message.message}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+    
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let partialChunk = '';
+    
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                yield chunk;
+            }
+    
+            // if (partialChunk) {
+            //     yield partialChunk;
+            // }
+        } catch (error) {
+            console.error('Error fetching stream:', error);
+            throw error;
+        }
+    }
+    
+
+
     // async *chatCompletionStream(message, userId) {
     //     try {
-    //         const response = await fetch(`http://43.156.109.32:8080/ai/generateStream?sessionId=${message.sessionId}&message=${message.message}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             }
+    //         const response = await axios({
+    //             method: 'get',
+    //             url: `http://43.156.109.32:8080/ai/generateStream?sessionId=${message.sessionId}&message=${message.message}`,
+    //             responseType: 'stream'
     //         });
-    
-    //         const reader = response.body.getReader();
-    //         const decoder = new TextDecoder('utf-8');
-    //         let partialChunk = '';
-    
-    //         while (true) {
-    //             const { done, value } = await reader.read();
-    //             console.log('value:', value);
-    //             if (done) break;
-    //             const chunk = decoder.decode(value, { stream: true });
-    //             partialChunk += chunk;
-    
+           
+    //         // 使用 response.data 作为可读流
+    //         for await (const chunk of response.data) {
+    //             // 将 Buffer 转换为字符串
+                
+    //             const text = chunk.toString('utf-8');
     //             // 如果响应包含多行，按行分割
-    //             const lines = partialChunk.split('\n').filter(line => line.trim());
-    //             for (let i = 0; i < lines.length - 1; i++) {
-    //                 yield lines[i];
+    //             const lines = text.split('\n').filter(line => line.trim());
+    //             for (const line of lines) {
+    //                 yield line;
     //             }
-    //             partialChunk = lines[lines.length - 1];
-    //         }
-    
-    //         if (partialChunk) {
-    //             yield partialChunk;
     //         }
     //     } catch (error) {
     //         console.error('Error fetching stream:', error);
     //         throw error;
     //     }
     // }
-
-
-    async *chatCompletionStream(message, userId) {
-        try {
-            const response = await axios({
-                method: 'get',
-                url: `http://43.156.109.32:8080/ai/generateStream?sessionId=${message.sessionId}&message=${message.message}`,
-                responseType: 'stream'
-            });
-           
-            // 使用 response.data 作为可读流
-            for await (const chunk of response.data) {
-                // 将 Buffer 转换为字符串
-                
-                const text = chunk.toString('utf-8');
-                console.log('response.data:', text);
-                // 如果响应包含多行，按行分割
-                const lines = text.split('\n').filter(line => line.trim());
-                for (const line of lines) {
-                    yield line;
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching stream:', error);
-            throw error;
-        }
-    }
 }
 
 module.exports = new KimiAPI(); 

@@ -33,18 +33,17 @@ router.get('/', (req, res) => {
 router.post('/api/generate-image', async (req, res) => {
     try {
         const { prompt } = req.body;
-        
-        if (!prompt) {
-            return res.status(400).json({ error: 'Prompt is required' });
-        }
+        // if (!prompt) {
+        //     return res.status(400).json({ error: 'Prompt is required' });
+        // }
         // Try the external image generation API first
         try {
             console.log('prompt:', prompt);
             const apiResponse = await axios.get(`http://43.156.109.32:8080/ai/image/generate?message=${prompt}&sessionId=${123}`);
             
             console.log('apiResponse:', apiResponse.data);
-            if (apiResponse.data.code === 200 && apiResponse.data.data) {
-                return res.json({ imageUrl: apiResponse.data.data });
+            if (apiResponse.data.code === 200) {
+                return res.json({ imageUrl: apiResponse.data.data, message: apiResponse.data.message });
             } else {
                 res.status(200).json({ error: 'Failed to generate image' });
             }
