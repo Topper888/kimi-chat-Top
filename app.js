@@ -13,15 +13,15 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
 const markdownIt = require('markdown-it');
-const md =  markdownIt({
+const md = markdownIt({
     html: true,
     linkify: true,
     typographer: true
-  })
+})
 
 const hbs = create({
-  defaultLayout: 'main',
-  extname: '.handlebars'
+    defaultLayout: 'main',
+    extname: '.handlebars'
 });
 
 // Middleware
@@ -35,9 +35,9 @@ app.set('layout', 'layouts/main');
 app.set('view engine', 'ejs');
 
 // 在生产环境中使用打包后的视图
-const viewsPath = process.env.NODE_ENV === 'production' 
-  ? path.join(__dirname, 'dist/views')
-  : path.join(__dirname, 'views');
+const viewsPath = process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, 'dist/views')
+    : path.join(__dirname, 'views');
 
 app.set('views', viewsPath);
 
@@ -81,7 +81,7 @@ app.use('/new/ppt-gen', (req, res) => {
     });
 });
 
-let currentSessionId = null; 
+let currentSessionId = null;
 
 // 生成会话ID
 function generateSessionId() {
@@ -91,7 +91,7 @@ function generateSessionId() {
 // 初始化新会话
 function initNewSession() {
     currentSessionId = generateSessionId();
-} 
+}
 
 // Socket.io connection
 io.on('connection', (socket) => {
@@ -99,50 +99,61 @@ io.on('connection', (socket) => {
     const userId = socket.id;
     initNewSession();
     // 发送 socket.id 给客户端
-    const userInfos = { 
-        sessionId: currentSessionId, 
-        userId: socket.id
+    const userInfos = {
+        sessionId: currentSessionId,
+        userId: userId,
+        queryPromptsShow: true,
     }
     socket.emit('session_init', userInfos);
 
     // Immediately initialize chat when user connects
     (async () => {
         try {
-            // 使用流式输出
-            const stream = kimiAPI.chatCompletionStream({
-                ...userInfos,
-                message: ''
-            });
-            let fullResponse = '';
-            
-            for await (const chunk of stream) {
-                fullResponse += chunk;
+
+            const modalPrompt = await kimiAPI.getPresetPrompts();
+            if (modalPrompt.code === 200) {
+                socket.emit('modal response', {
+                    message: modalPrompt.data,
+                    done: true
+                });
+            } else {
+                // 使用流式输出
+                const stream = kimiAPI.chatCompletionStream({
+                    ...userInfos,
+                    message: ''
+                });
+                let fullResponse = '';
+
+                for await (const chunk of stream) {
+                    fullResponse += chunk;
+                    socket.emit('chat response', {
+                        message: chunk,
+                        done: false
+                    });
+                }
+
+                // 发送完成标志
                 socket.emit('chat response', {
-                    message: chunk,
-                    done: false
+                    message: '',
+                    done: true
                 });
             }
-            
-            // 发送完成标志
-            socket.emit('chat response', {
-                message: '',
-                done: true
-            });
-            
+
+
         } catch (error) {
             console.error('Error:', error);
-            socket.emit('error', { 
+            socket.emit('error', {
                 message: 'Failed to get response from AI'
             });
         }
     })();
-    
+
     socket.on('chat message', async (message) => {
         try {
             // 使用流式输出
             const stream = kimiAPI.chatCompletionStream(message);
             let fullResponse = '';
-            
+
             for await (const chunk of stream) {
                 fullResponse += chunk;
                 socket.emit('chat response', {
@@ -150,21 +161,21 @@ io.on('connection', (socket) => {
                     done: false
                 });
             }
-            
+
             // 发送完成标志
             socket.emit('chat response', {
                 message: '',
                 done: true
             });
-            
+
         } catch (error) {
             console.error('Error:', error);
-            socket.emit('error', { 
+            socket.emit('error', {
                 message: 'Failed to get response from AI'
             });
         }
     });
-    
+
     socket.on('disconnect', () => {
         currentSessionId = null;
         console.log('User disconnected');

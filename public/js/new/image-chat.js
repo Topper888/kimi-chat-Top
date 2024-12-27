@@ -120,7 +120,7 @@ async function handleSendMessage() {
     // Add user message
     addMessage('user', prompt);
     messageInput.value = '';
-
+    messageInput.dispatchEvent(new Event('input'));
     // Show loading state
     addMessage('ai', '图片生成中...');
 
@@ -155,4 +155,9 @@ messageInput.addEventListener('keypress', (e) => {
         e.preventDefault();
         handleSendMessage();
     }
+});
+
+messageInput.addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
 });
