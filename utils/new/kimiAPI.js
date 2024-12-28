@@ -26,6 +26,7 @@ class KimiAPI {
     }
 
     async *chatCompletionStream(message) {
+        console.log('message', message);
         try {
             const response = await fetch(`http://43.156.109.32:8080/ai/generateStream?sessionId=${message.sessionId}&message=${message.message}`, {
                 method: 'GET',

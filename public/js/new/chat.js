@@ -37,10 +37,12 @@ function generateSessionId() {
 
 // 初始化新会话
 function initNewSession() {
-    currentSessionId = generateSessionId();
+    // currentSessionId = generateSessionId();
     const userId = localStorage.getItem('userId');
+    const sessionId = localStorage.getItem('sessionId');
+    const queryPromptsShow = localStorage.getItem('queryPromptsShow');
     console.log('New session started:', { sessionId: currentSessionId, userId });
-    return { sessionId: currentSessionId, userId };
+    return { sessionId: sessionId, userId, queryPromptsShow };
 }
 
 // 添加 socket.id 存储逻辑
@@ -158,13 +160,13 @@ function appendMessage(message, isUser = false, isFirst = false) {
 
 function sendMessage(isFirst = false) {
     let message = messageInput.value.trim();
-
+    const { sessionId } = initNewSession();
     if (message || isFirst) {
 
         appendMessage(message, true, isFirst);
         socket.emit('chat message', {
             message,
-            sessionId: currentSessionId,
+            sessionId: sessionId,
             userId: localStorage.getItem('userId')
         });
 
@@ -184,7 +186,6 @@ function sendMessage(isFirst = false) {
 function showQueryPromptsModal(data) {
     const modalContainer = document.getElementById('chat-promp-list');
     const presetPromptList = data.presetPromptList;
-    console.log('presetPromptList:', presetPromptList);
     // 清空现有内容
     modalContainer.innerHTML = '';
 
@@ -431,7 +432,7 @@ function showFloatingButton() {
 // 隐藏 chat-promp-type 元素并显示浮窗按钮
 editCursorPointer.addEventListener('click', () => {
     chatPrompType.style.display = 'none';
-    showFloatingButton();
+    // showFloatingButton();
     messageInput.value = "";
     messageInput.dispatchEvent(new Event('input'));
     console.log('触发click');

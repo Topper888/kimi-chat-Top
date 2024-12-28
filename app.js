@@ -64,11 +64,13 @@ app.use('/new/text-chat', (req, res) => {
 });
 
 app.use('/new/image-chat', (req, res) => {
+    const sessionId = generateSessionId(); 
     res.render('new/image-chat', {
         title: 'AI Teaching Assistant - Image Generation',
         layout: 'new/layouts/main',
         path: '/new/image-chat',
-        script: '<script src="/socket.io/socket.io.js">'
+        script: '<script src="/socket.io/socket.io.js">',
+        sessionId: sessionId
     });
 });
 

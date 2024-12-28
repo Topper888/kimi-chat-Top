@@ -7,6 +7,10 @@ const CONFIG = {
     }
 };
 
+
+const img_sessionId = localStorage.getItem('img_sessionId');
+
+console.log('img_sessionId:', img_sessionId)
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
 const chatMessages = document.getElementById('messages');
@@ -96,7 +100,7 @@ function addMessage(sender, content, isImage = false) {
         const response = await fetch('/image-chat/api/generate-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify({ prompt, img_sessionId })
         });
         const data = await response.json();
         
@@ -128,7 +132,7 @@ async function handleSendMessage() {
         const response = await fetch('/image-chat/api/generate-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify({ prompt, img_sessionId })
         });
         const data = await response.json();
         
