@@ -6,7 +6,7 @@
     --border-color: #e6e6e6;
     /* --hover-color: #f0f2f5; */
     --hover-color: #e9eaec;
-    --sidebar-width: 320px;
+    --sidebar-width: 280px;
 }
 
 body {
@@ -108,17 +108,30 @@ body.collapsed .sidebar {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    width: calc(100% - var(--sidebar-width));
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
-    /* margin-left: var(--sidebar-width); */
 }
 
 body.collapsed .main-content {
     margin-left: 0;
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 100%;
+    /* margin: 0 auto; */
+    padding-left: 0;
+}
+
+/* 媒体查询 */
+@media (max-width: 1200px) {
+    .main-content {
+        max-width: 100%;
+        padding: 0 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 0 10px;
+    }
 }
 
 /* 聊天界面样式 */
