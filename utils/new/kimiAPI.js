@@ -1,8 +1,9 @@
 // 暂时注释掉 OpenAI
 // const OpenAI = require("openai");
 const { mockResponses, getRandomResponse } = require('../mockData');
+const { Host } = require('./common');
 const axios = require('axios');
-
+console.log('Host in kimiAPI.js:', Host);
 class KimiAPI {
     constructor() {
         // 暂时注释掉 OpenAI 客户端配置
@@ -28,7 +29,7 @@ class KimiAPI {
     async *chatCompletionStream(message) {
         console.log('message', message);
         try {
-            const response = await fetch(`http://43.156.109.32:8080/ai/generateStream?sessionId=${message.sessionId}&message=${message.message}`, {
+            const response = await fetch(`${Host.prod}/ai/generateStream?sessionId=${message.sessionId}&message=${message.message}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -56,9 +57,8 @@ class KimiAPI {
     }
 
     async getPresetPrompts() {
-        // http://43.156.109.32:8080/ai/queryPresetPrompts
         try {
-            const response = await axios.get('http://43.156.109.32:8080/ai/queryPresetPrompts');
+            const response = await axios.get(`${Host.prod}/ai/queryPresetPrompts`);
             return response.data;
         } catch (error) {
             console.error('Error fetching preset prompts:', error);
@@ -66,33 +66,6 @@ class KimiAPI {
         }
     }
 
-
-
-
-    // async *chatCompletionStream(message, userId) {
-    //     try {
-    //         const response = await axios({
-    //             method: 'get',
-    //             url: `http://43.156.109.32:8080/ai/generateStream?sessionId=${message.sessionId}&message=${message.message}`,
-    //             responseType: 'stream'
-    //         });
-
-    //         // 使用 response.data 作为可读流
-    //         for await (const chunk of response.data) {
-    //             // 将 Buffer 转换为字符串
-
-    //             const text = chunk.toString('utf-8');
-    //             // 如果响应包含多行，按行分割
-    //             const lines = text.split('\n').filter(line => line.trim());
-    //             for (const line of lines) {
-    //                 yield line;
-    //             }
-    //         }
-    //     } catch (error) {
-    //         console.error('Error fetching stream:', error);
-    //         throw error;
-    //     }
-    // }
 }
 
 module.exports = new KimiAPI(); 

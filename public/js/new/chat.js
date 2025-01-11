@@ -108,10 +108,10 @@ function appendMessage(message, isUser = false, isFirst = false) {
         messageDiv.className = `message message-user`;
 
         // 添加用户头像
-        const avatarDiv = document.createElement('div');
-        avatarDiv.className = 'message-avatar';
-        avatarDiv.style.backgroundImage = `url('${CONFIG.AVATAR_CONFIG.user}')`;
-        messageDiv.appendChild(avatarDiv);
+        // const avatarDiv = document.createElement('div');
+        // avatarDiv.className = 'message-avatar';
+        // avatarDiv.style.backgroundImage = `url('${CONFIG.AVATAR_CONFIG.user}')`;
+        // messageDiv.appendChild(avatarDiv);
 
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
@@ -124,10 +124,10 @@ function appendMessage(message, isUser = false, isFirst = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message message-ai';
 
-            const avatarDiv = document.createElement('div');
-            avatarDiv.className = 'message-avatar';
-            avatarDiv.style.backgroundImage = `url('${CONFIG.AVATAR_CONFIG.ai}')`;
-            messageDiv.appendChild(avatarDiv);
+            // const avatarDiv = document.createElement('div');
+            // avatarDiv.className = 'message-avatar';
+            // avatarDiv.style.backgroundImage = `url('${CONFIG.AVATAR_CONFIG.ai}')`;
+            // messageDiv.appendChild(avatarDiv);
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
@@ -151,10 +151,16 @@ function appendMessage(message, isUser = false, isFirst = false) {
             } else {
                 currentMessageDiv.innerHTML = formatMessage(currentText);
             }
-
+            // 滚动到底部
+            scrollToBottom();
         }
     }
+    scrollToBottom();
+}
 
+// 添加一个新的辅助函数来处理滚动
+function scrollToBottom() {
+    const messagesDiv = document.getElementById('messages');
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
@@ -176,73 +182,133 @@ function sendMessage(isFirst = false) {
         messageInput.disabled = true;
         currentMessageDiv = null;
 
-         // 隐藏 chat-promp-type 元素
-         chatPrompType.style.display = 'none';
-         showFloatingButton();
-         messageInput.dispatchEvent(new Event('input'));
+        // 隐藏 chat-promp-type 元素
+        chatPrompType.style.display = 'none';
+        //  showFloatingButton();
+        messageInput.dispatchEvent(new Event('input'));
     }
 }
 
 function showQueryPromptsModal(data) {
     const modalContainer = document.getElementById('chat-promp-list');
-    const presetPromptList = data.presetPromptList;
-    // 清空现有内容
+    const tabsList = data.categoryList || [];
+    const presetPromptList = data.presetPromptList || [];
     modalContainer.innerHTML = '';
 
-    // 创建 grid 容器
-    const gridContainer = document.createElement('div');
-    gridContainer.className = 'grid mb-20 gap-10';
-    gridContainer.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    // 创建 Tabs
+    const tabsContainer = document.createElement('div');
+    tabsContainer.className = 'tabs-container';
+    // const tabs = ['全部', '教学', '行政', '宣发'];
 
-    // 循环生成内容
-    presetPromptList.forEach((prompt, index) => {
-        const container = document.createElement('div');
-        container.className = 'container-prompt';
+    // 检查是否需要添加"全部"选项
+    const hasAllCategory = tabsList.some(tab => tab.categoryType === 0 && tab.categoryName === '全部');
+    
+    if (!hasAllCategory) {
+        tabsList.unshift({ categoryType: 0, categoryName: '全部' });
+    }
 
-        // 默认选中第一个卡片
-        if (index === 0) {
-            container.classList.add('selected');
-            messageInput.value = prompt.prompt.prompt;
-            messageInput.dispatchEvent(new Event('input'));
-        }
-
-        const img = document.createElement('img');
-        img.src = prompt.iconUrl;
-        img.draggable = false;
-        img.className = 'img-prompt';
-
-        const title = document.createElement('div');
-        title.className = 'title-prompt';
-        title.textContent = prompt.mainTitle;
-
-        const description = document.createElement('div');
-        description.className = 'desc-prompt';
-        description.textContent = prompt.note;
-
-        container.appendChild(img);
-        container.appendChild(title);
-        container.appendChild(description);
-        gridContainer.appendChild(container);
-
-        // 添加点击事件，切换选中状态
-        container.addEventListener('click', () => {
-            document.querySelectorAll('.container-prompt').forEach(el => el.classList.remove('selected'));
-            container.classList.add('selected');
-            messageInput.value = prompt.prompt.prompt;
-            messageInput.dispatchEvent(new Event('input'));
-        });
+    tabsList.forEach((tab) => {
+        const tabElement = document.createElement('div');
+        tabElement.className = 'tab';
+        tabElement.textContent = tab.categoryName;
+        tabElement.dataset.category = tab.categoryType;
+        tabElement.addEventListener('click', () => switchTab(tab.categoryType));
+        tabsContainer.appendChild(tabElement);
     });
 
-    modalContainer.appendChild(gridContainer);
+    modalContainer.appendChild(tabsContainer);
+
+    // 创建内容容器
+    const contentContainer = document.createElement('div');
+    contentContainer.className = 'content-container';
+    modalContainer.appendChild(contentContainer);
+
+    // 切换 Tab 的函数
+    function switchTab(category) {
+        tabsContainer.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        tabsContainer.querySelector(`[data-category="${category}"]`).classList.add('active');
+
+        let filteredPrompts;
+        if (category === 0) {
+            // 显示所有提示
+            filteredPrompts = presetPromptList;
+        } else {
+            // 根据类别筛选提示
+            filteredPrompts = presetPromptList.filter(prompt => prompt.promptCategory === category);
+        }
+
+        renderContent(filteredPrompts, category);
+    }
+
+    // 渲染内容的函数
+    function renderContent(prompts = [], category) {
+        contentContainer.innerHTML = '';
+
+        if (prompts.length === 0) {
+            const devMessage = document.createElement('div');
+            devMessage.className = 'dev-message';
+            devMessage.textContent = '正在开发中···';
+            contentContainer.appendChild(devMessage);
+
+            // 清空输入框的内容
+            messageInput.value = '';
+            messageInput.dispatchEvent(new Event('input'));
+            return;
+        }
+
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'grid mb-20 gap-10';
+        gridContainer.style.gridTemplateColumns = 'repeat(4, 1fr)';
+
+        prompts.forEach((prompt, index) => {
+            const container = document.createElement('div');
+            container.className = 'container-prompt';
+
+            if (index === 0) {
+                container.classList.add('selected');
+                messageInput.value = prompt.prompt.prompt;
+                messageInput.dispatchEvent(new Event('input'));
+            }
+
+            const img = document.createElement('img');
+            img.src = prompt.iconUrl;
+            img.draggable = false;
+            img.className = 'img-prompt';
+
+            const title = document.createElement('div');
+            title.className = 'title-prompt';
+            title.textContent = prompt.mainTitle;
+
+            const description = document.createElement('div');
+            description.className = 'desc-prompt';
+            description.textContent = prompt.note;
+
+            container.appendChild(img);
+            container.appendChild(title);
+            container.appendChild(description);
+            gridContainer.appendChild(container);
+
+            container.addEventListener('click', () => {
+                document.querySelectorAll('.container-prompt').forEach(el => el.classList.remove('selected'));
+                container.classList.add('selected');
+                messageInput.value = prompt.prompt.prompt;
+                messageInput.dispatchEvent(new Event('input'));
+            });
+        });
+
+        contentContainer.appendChild(gridContainer);
+    }
+
+    // 初始化显示全部
+    switchTab(0);
 }
-
-
 
 // Socket event listeners
 socket.on('chat response', (data) => {
     if (data.message) {
         // 隐藏loading动画
         appendMessage(data.message, false);
+        scrollToBottom();
     }
     if (data.done) {
         document.getElementById('message-input').disabled = false;

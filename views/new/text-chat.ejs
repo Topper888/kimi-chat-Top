@@ -13,8 +13,42 @@
 
 <body>
     <div class="chat-container">
-        <div class="chat-messages" id="messages">
+        <div class="chat-header"></div>
+        <div class="chat-messages" >
             <!-- 消息内容 -->
+             <div id="messages">
+
+             </div>
+             <!-- 弹窗内容 -->
+            <div class="chat-promp-type" id="chat-promp-type">
+                <div class="promp-title-top">
+                    <div class="promp-title-left"><span role="img" class="semi-icon semi-icon-default icon-ov1m6x"><svg
+                                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" fill-rule="evenodd"
+                                    d="M5.122 8.242a.356.356 0 0 0 .355-.315c.167-.994.313-1.504.63-1.82.314-.316.822-.463 1.81-.63a.36.36 0 0 0 .325-.355.356.356 0 0 0-.325-.356c-.988-.167-1.496-.314-1.81-.63-.317-.316-.463-.826-.63-1.819A.356.356 0 0 0 5.122 2a.36.36 0 0 0-.357.316c-.167.993-.313 1.503-.629 1.82-.315.316-.822.463-1.808.63A.356.356 0 0 0 2 5.122c0 .193.147.332.326.356.988.166 1.496.31 1.81.624.316.314.462.825.63 1.826.029.178.17.314.356.314m14.42-2.05-2.383-2.383-1.229 1.23 2.382 2.382zm-2.49 2.49L14.668 6.3l-9.476 9.475 2.383 2.382zm1.368-6.134 2.383 2.382a1.784 1.784 0 0 1 0 2.523L8.655 19.6a1.8 1.8 0 0 1-.99.502l-4.017.618a.892.892 0 0 1-1.017-1.017l.618-4.017c.057-.375.233-.722.501-.99L15.898 2.548a1.783 1.783 0 0 1 2.522 0m.98 19.111a.46.46 0 0 1-.456.405.466.466 0 0 1-.459-.403c-.215-1.289-.403-1.945-.808-2.35-.405-.403-1.057-.587-2.328-.802a.464.464 0 0 1-.419-.456c0-.245.184-.434.422-.458 1.268-.215 1.92-.404 2.325-.81s.593-1.063.808-2.34a.466.466 0 0 1 .46-.407c.243 0 .421.176.456.408.214 1.276.402 1.932.808 2.339.406.406 1.058.595 2.328.81a.46.46 0 0 1 .419.458c0 .243-.185.43-.418.457-1.27.214-1.923.402-2.329.808-.405.407-.594 1.063-.808 2.341"
+                                    clip-rule="evenodd"></path>
+                            </svg></span></div>
+                    <div class="promp-title-left">帮我写作</div>
+                </div>
+                <div class="promp-title-content">
+                    <div class="promp-title">多种学科，教学方案，一键搞定</div>
+                    <div class="edit-cursor-pointer" id="edit-cursor-pointer">
+                        <span role="img" class="semi-icon" data-testid="skill-page-close"><svg
+                                xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                    d="M10.586 12 8.464 9.879A1 1 0 1 1 9.88 8.464L12 10.586l2.121-2.122a1 1 0 0 1 1.415 1.415L13.414 12l2.122 2.121a1 1 0 0 1-1.415 1.415L12 13.414l-2.121 2.122a1 1 0 1 1-1.415-1.415z">
+                                </path>
+                                <path fill="currentColor"
+                                    d="M1 12c0 6.075 4.925 11 11 11s11-4.925 11-11S18.075 1 12 1 1 5.925 1 12m20 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0">
+                                </path>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+                <div id="chat-promp-list">
+    
+                </div>
+            </div>
         </div>
         <div class="chat-input">
             <div class="input-box">
@@ -30,38 +64,7 @@
                     </svg></span>
             </button>
         </div>
-        <div class="chat-promp-type" id="chat-promp-type">
-            <div class="promp-title-top">
-                <div class="promp-title-left"><span role="img"
-                        class="semi-icon semi-icon-default icon-ov1m6x"><svg xmlns="http://www.w3.org/2000/svg"
-                            width="16" height="16" fill="none" viewBox="0 0 24 24">
-                            <path fill="currentColor" fill-rule="evenodd"
-                                d="M5.122 8.242a.356.356 0 0 0 .355-.315c.167-.994.313-1.504.63-1.82.314-.316.822-.463 1.81-.63a.36.36 0 0 0 .325-.355.356.356 0 0 0-.325-.356c-.988-.167-1.496-.314-1.81-.63-.317-.316-.463-.826-.63-1.819A.356.356 0 0 0 5.122 2a.36.36 0 0 0-.357.316c-.167.993-.313 1.503-.629 1.82-.315.316-.822.463-1.808.63A.356.356 0 0 0 2 5.122c0 .193.147.332.326.356.988.166 1.496.31 1.81.624.316.314.462.825.63 1.826.029.178.17.314.356.314m14.42-2.05-2.383-2.383-1.229 1.23 2.382 2.382zm-2.49 2.49L14.668 6.3l-9.476 9.475 2.383 2.382zm1.368-6.134 2.383 2.382a1.784 1.784 0 0 1 0 2.523L8.655 19.6a1.8 1.8 0 0 1-.99.502l-4.017.618a.892.892 0 0 1-1.017-1.017l.618-4.017c.057-.375.233-.722.501-.99L15.898 2.548a1.783 1.783 0 0 1 2.522 0m.98 19.111a.46.46 0 0 1-.456.405.466.466 0 0 1-.459-.403c-.215-1.289-.403-1.945-.808-2.35-.405-.403-1.057-.587-2.328-.802a.464.464 0 0 1-.419-.456c0-.245.184-.434.422-.458 1.268-.215 1.92-.404 2.325-.81s.593-1.063.808-2.34a.466.466 0 0 1 .46-.407c.243 0 .421.176.456.408.214 1.276.402 1.932.808 2.339.406.406 1.058.595 2.328.81a.46.46 0 0 1 .419.458c0 .243-.185.43-.418.457-1.27.214-1.923.402-2.329.808-.405.407-.594 1.063-.808 2.341"
-                                clip-rule="evenodd"></path>
-                        </svg></span></div>
-                <div class="promp-title-left">帮我写作</div>
-            </div>
-            <div class="promp-title-content">
-                <div class="promp-title">多种学科，教学方案，一键搞定</div>
-                <div class="edit-cursor-pointer" id="edit-cursor-pointer">
-                    <span role="img"
-                        class="semi-icon"
-                        data-testid="skill-page-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                            fill="none" viewBox="0 0 24 24">
-                            <path fill="currentColor"
-                                d="M10.586 12 8.464 9.879A1 1 0 1 1 9.88 8.464L12 10.586l2.121-2.122a1 1 0 0 1 1.415 1.415L13.414 12l2.122 2.121a1 1 0 0 1-1.415 1.415L12 13.414l-2.121 2.122a1 1 0 1 1-1.415-1.415z">
-                            </path>
-                            <path fill="currentColor"
-                                d="M1 12c0 6.075 4.925 11 11 11s11-4.925 11-11S18.075 1 12 1 1 5.925 1 12m20 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0">
-                            </path>
-                        </svg>
-                    </span>
-                </div>
-            </div>
-            <div id="chat-promp-list">
-
-            </div>
-        </div>
+        
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/new/chat.js"></script>

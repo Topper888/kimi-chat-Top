@@ -24,10 +24,10 @@ function addMessage(sender, content, isImage = false) {
     messageDiv.className = `message message-${sender === 'user' ? 'user' : 'ai'}`;
     
     // 添加头像
-    const avatarDiv = document.createElement('div');
-    avatarDiv.className = 'message-avatar';
-    avatarDiv.style.backgroundImage = `url('${CONFIG.AVATAR_CONFIG[sender === 'user' ? 'user' : 'ai']}')`;
-    messageDiv.appendChild(avatarDiv);
+    // const avatarDiv = document.createElement('div');
+    // avatarDiv.className = 'message-avatar';
+    // avatarDiv.style.backgroundImage = `url('${CONFIG.AVATAR_CONFIG[sender === 'user' ? 'user' : 'ai']}')`;
+    // messageDiv.appendChild(avatarDiv);
     
     // 添加消息内容容器
     const contentDiv = document.createElement('div');

@@ -4,6 +4,7 @@ const nodecallspython = require('node-calls-python');
 const py = nodecallspython.interpreter;
 const path = require('path');
 const axios = require('axios');
+const { Host } = require('../utils/new/common')
 
 // Initialize Python module
 let imageGenerator = null;
@@ -41,7 +42,7 @@ router.post('/api/generate-image', async (req, res) => {
             console.log('prompt:', prompt);
             // const img_sessionId = localStorage.getItem('img_sessionId', sessionId);
             console.log('img_sessionId:', img_sessionId);
-            const apiResponse = await axios.get(`http://43.156.109.32:8080/ai/image/generate?message=${prompt}&sessionId=${img_sessionId}`);
+            const apiResponse = await axios.get(`${Host.prod}/ai/image/generate?message=${prompt}&sessionId=${img_sessionId}`);
             
             console.log('apiResponse:', apiResponse.data);
             if (apiResponse.data.code === 200) {
