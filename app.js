@@ -145,7 +145,7 @@ io.on('connection', (socket) => {
         } catch (error) {
             console.error('Error:', error);
             socket.emit('error', {
-                message: 'Failed to get response from AI'
+                message: 'AI生成数据失败，请稍后重试'
             });
         }
     })();
@@ -173,7 +173,7 @@ io.on('connection', (socket) => {
         } catch (error) {
             console.error('Error:', error);
             socket.emit('error', {
-                message: 'Failed to get response from AI'
+                message: 'AI生成数据失败，请稍后重试'
             });
         }
     });

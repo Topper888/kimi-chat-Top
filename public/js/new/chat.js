@@ -1,13 +1,32 @@
 
 const socket = io();
 
-// // 在 script 中使用 custom 字段
+//初始化配置
+if (typeof hljs !== 'undefined') {
+    hljs.configure({
+        ignoreUnescapedHTML: true
+    });
+} else {
+    console.error('Highlight.js is not loaded');
+}
 
 // 创建 MarkdownIt 实例
 const md = window.markdownit({
+    breaks: true,
     highlight: true,
     linkify: true,
-    typographer: true
+    typographer: true,
+    html: false,
+    highlight: function (str, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+            try {
+                return '<pre class="hljs"><code>' +
+                       hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+                       '</code></pre>';
+            } catch (__) {}
+        }
+        return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
+    }
 });
 
 
@@ -144,13 +163,20 @@ function appendMessage(message, isUser = false, isFirst = false) {
             currentText += message;
             currentMessageDiv.dataset.fullText = currentText;
 
-            // currentMessageDiv.textContent = currentText;
-
-            if (md) {
-                currentMessageDiv.innerHTML = md.render(currentText);
-            } else {
-                currentMessageDiv.innerHTML = formatMessage(currentText);
+            try {
+                if (md) {
+                    currentMessageDiv.innerHTML = md.render(currentText);
+                    currentMessageDiv.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
+                } else {
+                    currentMessageDiv.innerHTML = formatMessage(currentText);
+                }
+            } catch(error) {
+                console.error('Error rendering message:', error);
+                currentMessageDiv.innerHTML = '<p class="error-message">抱歉，生成内容时出现错误。请尝试重新输入或换个话题。</p>';
             }
+            
             // 滚动到底部
             scrollToBottom();
         }

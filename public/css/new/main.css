@@ -944,6 +944,7 @@ body.collapsed .collapse-btn svg {
     display: flex;
     flex-direction: column;
     padding-bottom: 20px;
+    position: relative;
 }
 
 
@@ -995,6 +996,29 @@ body.collapsed .collapse-btn svg {
     font-size: 14px;
 }
 
+.message-content pre {
+    white-space: pre-wrap;       /* 允许在任何地方换行 */
+    word-wrap: break-word;       /* 允许长单词在必要时断开 */
+    overflow-x: auto;            /* 如果内容过宽，添加水平滚动条 */
+    max-width: 100%;             /* 确保不超过父容器宽度 */
+}
+
+.message-content pre code {
+    display: block;
+    padding: 1em;
+    background-color: #f4f4f4;   /* 浅灰色背景 */
+    border-radius: 4px;          /* 圆角 */
+    font-family: 'Courier New', Courier, monospace; /* 等宽字体 */
+    font-size: 0.9em;            /* 稍微小一点的字体大小 */
+    line-height: 1.5;            /* 增加行高以提高可读性 */
+}
+
+.hljs {
+    white-space: pre-wrap;       /* 允许在任何地方换行 */
+    word-wrap: break-word;       /* 允许长单词在必要时断开 */
+    max-width: 100%;             /* 确保不超过父容器宽度 */
+}
+
 /* 生成结果展示样式 */
 .generated-content {
     width: 100%;
@@ -1026,9 +1050,10 @@ body.collapsed .collapse-btn svg {
 }
 
 .chat-promp-type {
-    position: relative;
+    position: absolute;
     /* width: calc(100% - var(--sidebar-width));
     max-width: 960px; */
+    top: 0;
     width: 100%;
     max-height: 100%;
     overflow-y: auto;
